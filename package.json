@@ -1,0 +1,20 @@
+{
+  "name": "vote-assister",
+  "version": "1.0.0",
+  "description": "Tool to check if you can vote by mail in your location or see your closest locations for in-person voting.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/meyges/vote-assister.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/meyges/vote-assister/issues"
+  },
+  "homepage": "https://github.com/meyges/vote-assister#readme"
+}

@@ -102,3 +102,9 @@ dist
 
 # TernJS port file
 .tern-port
+
+
+# adding client ignore config
+
+client/dist
+client/node_modules

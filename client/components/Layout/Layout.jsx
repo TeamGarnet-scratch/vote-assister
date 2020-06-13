@@ -11,7 +11,7 @@ export default (props) => {
     <div className={styles.Layout}>
       <NavBar />
       this is my Layout
-      <div>{props.children}</div>
+      <div className={styles.ContentContainer}>{props.children}</div>
       <Footer />
     </div>
   );

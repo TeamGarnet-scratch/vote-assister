@@ -28,7 +28,7 @@ const getMatchingElections = () => {
     .then((res) => res.json())
     .then((data) => {
       // shorter reference to elections array. each element will be an object
-      const elections = data.elections;
+      const { elections } = data;
       // save the last two characters from the address to get the state's shorthand, and convert to lowercase
       const stateCode = address.substring(address.length - 2).toLowerCase();
       // create an array to save elections that match the location

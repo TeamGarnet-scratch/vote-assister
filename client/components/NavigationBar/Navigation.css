@@ -1,0 +1,8 @@
+.NavBar {
+  background-color: #145594;
+  height: 5vh;
+  box-shadow: 0 3px 1px 0px hsl(0, 0%, 70%);
+  display: flex;
+  position: sticky;
+  top: 0;
+}

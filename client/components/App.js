@@ -5,7 +5,8 @@ class App extends Component {
   render() {
     return (
       <Layout>
-        <div style={{ width: "40%" }}>My stuff</div>
+        Anything goes in here will be centered both vertically and horizontally
+        since the Layout Component has display of flex.
       </Layout>
     );
   }

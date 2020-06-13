@@ -1,8 +1,10 @@
 const path = require('path');
 const express = require('express');
 const fetch = require('node-fetch');
+const noElectionsError = require('./constants/errors/no-elections');
+const invalidDataError = require('./constants/errors/invalid-data');
 
-// passing in the path as we've got the .env file in the root folder
+// passing in the path to config here because we've got the .env file in the root folder
 require('dotenv').config({
   path: path.resolve(__dirname, '../.env'),
 });
@@ -10,7 +12,7 @@ require('dotenv').config({
 const app = express();
 const port = 3000;
 
-// this is a sample address that will be replaced by user input from the front-end
+// ***this is a sample address that will need to be replaced by user input from the front-end***
 const address = '1263%20Pacific%20Ave.%20Kansas%20City%20KS';
 // create bariable to hold electionId which we'll get from the first fetch below
 let electionId;
@@ -48,7 +50,7 @@ const getMatchingElections = () => {
       if (matchingElections.length === 0) {
         // and skip the next fetch because there is no election to get data about
         console.log(`no upcoming elections in the US or ${stateCode}`);
-        return `no upcoming elections in the US or ${stateCode}`;
+        return noElectionsError(stateCode);
       }
       // if we only get one match, we can save the id immediately
       if (matchingElections.length === 1) {
@@ -64,6 +66,7 @@ const getMatchingElections = () => {
         electionId = parseInt(matchingElections[0].id, 10);
       }
       console.log(`electionId is ${electionId}`);
+      return electionId;
     })
     .catch((err) => console.log(`ERROR in server attempting to get Election ids. Error is: ${err}`));
 };
@@ -79,8 +82,16 @@ const getElectionData = () => {
   })
     .then((res) => res.json())
     .then((data) => {
-      electionData = data;
-      console.log(`matching election data is ${JSON.stringify(electionData)}`);
+      console.log(`data.election.id is ${data.election.id}`);
+      // check to make sure we've got an object with an election property, and that the id matches the one we wanted
+      if (parseInt(data.election.id, 10) === electionId) {
+        // if so, save it in electionData
+        electionData = data;
+        console.log(`matching election data is ${JSON.stringify(electionData)}`);
+        return electionData;
+      }
+      // otherwise, return an error
+      return invalidDataError(electionId);
     })
     .catch((err) => console.log(`ERROR in server attempting to get election info for ${address}. Error is: ${err}`));
 };

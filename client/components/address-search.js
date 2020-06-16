@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import './address-search.css';
+import styles from './address-search.css';
 
 const AddressSearch = ({ onSubmit }) => {
   const [address, setAddress] = useState();
@@ -9,24 +9,26 @@ const AddressSearch = ({ onSubmit }) => {
   }, []);
 
   return (
-    <form onSubmit={onSubmit} className='address__search'>
+    <form onSubmit={onSubmit} className={styles.main_banner}>
       <h2 className='where__vote'>Where do I vote?</h2>
-      <div className='call__to__action'>
-        <label className='call__to__action' htmlFor='address'>
-          Enter address or zip code:
-        </label>
-      </div>
-      <div className='search__input'>
-        <input
-          className='search__input'
-          id='address'
-          placeholder='enter address/zip code'
-        />
-      </div>
-      <div className='search__button'>
-        <button type='submit' className='search__button'>
-          Search Locations
-        </button>
+      <div class='main__banner'>
+        <div class='search__title'>
+          <label class='call__to__action' htmlFor='address'>
+            Enter address or zip code:
+          </label>
+        </div>
+        <div class='search__input__section'>
+          <input
+            class='search__input'
+            id='address'
+            placeholder='enter address/zip code'
+          />
+        </div>
+        <div class='search__button'>
+          <button type='submit' class='search__input__button'>
+            <p class='search__input__button-text'>Search Locations</p>
+          </button>
+        </div>
       </div>
     </form>
   );

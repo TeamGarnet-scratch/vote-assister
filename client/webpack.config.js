@@ -1,8 +1,8 @@
 const path = require("path");
-var HtmlWebpackPlugin = require("html-webpack-plugin");
+const HtmlWebpackPlugin = require("html-webpack-plugin");
 const { CleanWebpackPlugin } = require("clean-webpack-plugin");
 
-//minicssExtractPlugin
+//  minicssExtractPlugin
 
 module.exports = {
   mode: "development",
@@ -33,6 +33,9 @@ module.exports = {
         ],
       },
     ],
+  },
+  resolve: {
+    extensions: [" ", ".js", ".jsx"],
   },
   plugins: [
     new HtmlWebpackPlugin({ template: "./index.html" }),

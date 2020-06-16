@@ -1,0 +1,61 @@
+.main__banner {
+  width: 334px;
+  height: 456px;
+  border-top: 6px solid #40a4f4;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background: #dbebf9;
+  box-shadow: 0px 4px 4px rgba(0, 0, 0, 0.25);
+  border-radius: 5px;
+}
+
+.search__title {
+  display: flex;
+  flex-direction: column-reverse;
+  height: 30%;
+}
+
+.search__input__section {
+  height: 25%;
+}
+
+.search__button {
+  height: 45%;
+  align-self: bottom;
+}
+
+.call__to__action {
+  font-family: 'Work Sans';
+  font-style: normal;
+  font-weight: 600;
+  font-size: 14px;
+  line-height: 16px;
+  color: #000000;
+}
+
+.search_input {
+  font-family: 'Work Sans';
+  font-style: normal;
+  font-weight: 600;
+  font-size: 14px;
+  line-height: 16px;
+  color: #3c3b3b;
+  border-radius: 5px;
+}
+
+.search__input__button {
+  background: #428bca;
+  border-radius: 5px;
+  height: 3.75em;
+}
+
+.search__input__button_text {
+  font-family: 'Work Sans';
+  font-style: normal;
+  font-weight: 600;
+  font-size: 14px;
+  line-height: 16px;
+  color: #fffcfc;
+  padding: 0px 0px 0px 0px;
+}

@@ -1,14 +1,12 @@
-import React, { Component } from 'react';
-import Layout from './Layout/Layout.jsx';
-import NavBar from './NavigationBar/NavigationBar.jsx';
-import Footer from './Footer/Footer.jsx';
+import React, { Component } from "react";
+import Layout from "./Layout/Layout.jsx";
+
 class App extends Component {
   render() {
     return (
       <Layout>
-        <NavBar />
-        this is my Layout
-        <Footer />
+        Anything goes in here will be centered both vertically and horizontally
+        since the Layout Component has display of flex.
       </Layout>
     );
   }

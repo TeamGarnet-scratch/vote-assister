@@ -1,30 +1,30 @@
-const path = require("path");
-const HtmlWebpackPlugin = require("html-webpack-plugin");
-const { CleanWebpackPlugin } = require("clean-webpack-plugin");
+const path = require('path')
+const HtmlWebpackPlugin = require('html-webpack-plugin')
+const { CleanWebpackPlugin } = require('clean-webpack-plugin')
 
 //  minicssExtractPlugin
 
 module.exports = {
-  mode: "development",
-  entry: "./index.js",
+  mode: 'development',
+  entry: './index.js',
   output: {
-    path: path.resolve(__dirname, "../dist"),
-    filename: "bundle[hash].js",
+    path: path.resolve(__dirname, '../dist'),
+    filename: 'bundle[hash].js',
   },
   module: {
     rules: [
       {
         test: /\.jsx?/,
         exclude: /node_modules/,
-        loader: "babel-loader",
+        loader: 'babel-loader',
       },
       {
         test: /\.css$/i,
         exclude: /node_modules/,
         loaders: [
-          "style-loader",
+          'style-loader',
           {
-            loader: "css-loader",
+            loader: 'css-loader',
             options: {
               modules: true,
               sourceMap: true,
@@ -35,10 +35,10 @@ module.exports = {
     ],
   },
   resolve: {
-    extensions: [" ", ".js", ".jsx"],
+    extensions: [' ', '.js', '.jsx'],
   },
   plugins: [
-    new HtmlWebpackPlugin({ template: "./index.html" }),
+    new HtmlWebpackPlugin({ template: './index.html' }),
     new CleanWebpackPlugin(),
   ],
-};
+}

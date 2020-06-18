@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import GeoSearchBar from '../geo-search-bar/GeoSearchBar';
 import styles from './address-search.css';
 
 const AddressSearch = ({ onSubmit }) => {
@@ -18,11 +19,7 @@ const AddressSearch = ({ onSubmit }) => {
           </label>
         </div>
         <div className={styles.search__input__section}>
-          <input
-            className={styles.search__input}
-            id="address"
-            placeholder="enter address/zip code"
-          />
+          <GeoSearchBar />
         </div>
         <div className={styles.Namesearch__button}>
           <button type="submit" className={styles.search__input__button}>

@@ -30,7 +30,7 @@ const GeoSearchBar = () => {
   });
 
   const [loaded, error] = useScript(
-    `https://maps.googleapis.com/maps/api/js?key=AIzaSyDccN-2MwnzPQhW9Nfwvat5Wf53-Oy15yI&libraries=places&callback=initMap`
+    `https://maps.googleapis.com/maps/api/js?key=process.env.REACT_APP_GOOGLE_MAPS_API_KEY&libraries=places&callback=initMap`
   );
 
   useEffect(() => {

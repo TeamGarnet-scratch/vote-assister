@@ -2,7 +2,7 @@ import React, { useRef, useState} from 'react';
 import {LoadScript, GoogleMap, Marker, InfoWindow} from '@react-google-maps/api';
 
 import mapStyle from "./MapStyle";
-
+import styled from "styled-components";
 
 const options = {
   styles: mapStyle
@@ -12,11 +12,31 @@ const mapContainerStyle = {
   height: `100vh`,
   width: `100%`,
 };
-const InfoBoxContent =(props)=>(
-<div>
-    <h3>{props.title}</h3>
+const InfoWrap = styled.div`display: ${props => props.display || 'flex'};  max-width:300px; margin-top:1em;`;
+const InfoWrapTittle = styled.h2`font-size:1.2em; text-decoration: underline;`;
+const InfoWrapCellTittlePoll = styled.h3`font-size:1em; color:#B0ACAC; margin-right:2em; width:5em`;
+const InfoWrapCellTittleTwoColumns = styled.h3`font-size:1em; margin-right:2em;width:5em`;
+const InfoWrapCellTittleOneColumns = styled.h3`font-size:1em; `;
+
+const InfoBoxContent = (props) => (
+<div className='info-wrap'>
+    <InfoWrapTittle>Location Name</InfoWrapTittle>
+    <InfoWrap>  
+      <InfoWrapCellTittlePoll>poll hours</InfoWrapCellTittlePoll> 
+      <div><strong>8AM - 6PM</strong></div>
+  </InfoWrap>
+  <InfoWrap> 
+    <InfoWrapCellTittleTwoColumns>Address:</InfoWrapCellTittleTwoColumns> 
+    <div>Eisenhower Recreation Center <br/>
+    4300 E Dartmouth Ave<br/>Denver, CO</div>
+</InfoWrap>
+<InfoWrap display="inline-block"> 
+<InfoWrapCellTittleTwoColumns>Notes:</InfoWrapCellTittleTwoColumns>
+    <div>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Aenean ut sem quis purus tristique fermentum ac in urna. Nam sodales, augue eget mollis tincidunt, erat risus blandit elit, id pharetra libero ligula sit amet sapien.</div>
+</InfoWrap>
+    {/* <h3>{props.title}</h3>
     <div>{props.id}</div>
-    <div>{props.desc}</div>
+    <div>{props.desc}</div> */}
 </div>
 )
 
@@ -69,14 +89,11 @@ const Map = () => {
   const markerClickHandler = (event, place) => {
     // Remember which place was clicked
     setSelectedPlace(place);
-
     // Required so clicking a 2nd marker works as expected
     if (infoOpen) {
       setInfoOpen(false);
     }
-
     setInfoOpen(true);
-
     // If you want to zoom in a little on marker click
     if (zoom < 13) {
       setZoom(4);
@@ -86,7 +103,6 @@ const Map = () => {
   return (
     <div>
       <LoadScript
-         id="script-loader"
         googleMapsApiKey={process.env.REACT_APP_GOOGLE_MAPS_API_KEY}
         language='en'
         region='us'
@@ -125,11 +141,10 @@ const Map = () => {
               anchor={markers[selectedPlace.id]}
               onCloseClick={() => setInfoOpen(false)}
             >
-
-             
-         <InfoBoxContent id={selectedPlace.id} title={selectedPlace.title} desc={selectedPlace.desc} />
-               
-              
+              <InfoBoxContent 
+              id={selectedPlace.id} 
+              title={selectedPlace.title} 
+              desc={selectedPlace.desc} />
             </InfoWindow>
           )}
           </GoogleMap>
@@ -139,16 +154,4 @@ const Map = () => {
 };
 
 
-
-const Info = (props) =>{
-console.log('test');
-  const infoPanelStyle=``
-  return ( 
-  <div>
-    <h3>{props.title}</h3>
-    <div>{props.id}</div>
-    <div>{props.desc}</div>
-  </div>
-  )
-}
 export default Map;

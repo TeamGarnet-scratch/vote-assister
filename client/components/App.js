@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import Layout from './Layout/Layout.jsx';
 import AddressComponent from './address-search/address-search';
+import CivicSummaryComponent from './civic-summary/civic-summary';
 
 class App extends Component {
   constructor(props) {
@@ -16,7 +17,8 @@ class App extends Component {
       <Layout>
         {/* Anything goes in here will be centered both vertically and horizontally
         since the Layout Component has display of flex. */}
-        <AddressComponent onSubmit={this.onSubmit}>hi</AddressComponent>
+        <AddressComponent onSubmit={this.onSubmit}></AddressComponent>
+        {/* <CivicSummaryComponent></CivicSummaryComponent> */}
       </Layout>
     );
   }

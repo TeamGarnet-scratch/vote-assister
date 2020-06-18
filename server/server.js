@@ -1,7 +1,7 @@
 const path = require('path');
 const express = require('express');
 const fetch = require('node-fetch');
-const { Client, Status } = require('@googlemaps/google-maps-services-js');
+
 const noElectionsError = require('./constants/errors/no-elections');
 const invalidDataError = require('./constants/errors/invalid-data');
 
@@ -20,12 +20,43 @@ const userLocation = {};
 userLocation.address = '3549%20G%20Rd%20Palisade%20CO';
 
 // create bariable to hold electionId which we'll get from the first fetch below
-let electionId;
+// let electionId;
 // save election data to here when we get it
-let electionData;
+// let electionData;
+
+// used to parse JSON bodies
+app.use(express.json());
+
+// to geocode an address, we need to make a get request from this URL with the address
+// `https://maps.googleapis.com/maps/api/geocode/json?address=${address}&key=${mapsAPI}`
+// the resulting long/lat for each will be in results[index].geometry.location.lat and
+// results[index].geometry.location.long
+// in general, we'll want to use results[0] because other results are just if it's unsure
+// about the address and gives multiple responses
+
+// putting this in a function so we can return a promise that we wait for.
+// we'll want to wait for the promise for get ElectionData to resolve before calling this
+const geocodeUserAddress = () => {
+  // get request for user address
+  fetch(`https://maps.googleapis.com/maps/api/geocode/json?address=${userLocation.address}&key=${mapsAPI}`, {
+    method: 'GET',
+    headers: {
+      'Content-Type': 'Application/JSON',
+    },
+  })
+    .then((res) => res.json())
+    .then((data) => {
+      console.log(`latitude is ${data.results[0].geometry.location.lat} and longitude is ${data.results[0].geometry.location.lng}`);
+      userLocation.latitude = data.results[0].geometry.location.lat;
+      userLocation.longitude = data.results[0].geometry.location.lng;
+    })
+    .catch();
+};
 
 // getting election ids
-const getMatchingElections = () => {
+const getMatchingElections = async () => {
+  // placeholder for election id
+  let electionId;
   return fetch(`https://www.googleapis.com/civicinfo/v2/elections?key=${civicAPI}`, {
     method: 'GET',
     headers: {
@@ -89,10 +120,10 @@ const getMatchingElections = () => {
 };
 
 // getting info about the next election based on address passed in
-const getElectionData = () => {
+const getElectionData = async (electionId) => {
   // if it's defined, pass it to the API with the address and api key to get the matching election info
   // we also only accept the election info that is marked as "official" in the API using the "officialOnly=true"
-  fetch(`https://www.googleapis.com/civicinfo/v2/voterinfo?key=${process.env.CIVIC_API_KEY}&address=${userLocation.address}&electionId=${electionId}&officialOnly=true`, {
+  return fetch(`https://www.googleapis.com/civicinfo/v2/voterinfo?key=${process.env.CIVIC_API_KEY}&address=${userLocation.address}&electionId=${electionId}&officialOnly=true`, {
     method: 'GET',
     headers: {
       'Content-Type': 'Application/JSON',
@@ -100,11 +131,11 @@ const getElectionData = () => {
   })
     .then((res) => res.json())
     .then((data) => {
-      console.log(`data.election.id is ${data.election.id}`);
+      console.log(`data.election is ${JSON.stringify(data.election)}`);
       // check to make sure we've got an object with an election property, and that the id matches the one we wanted
       if (parseInt(data.election.id, 10) === electionId) {
         // if so, save it in electionData
-        electionData = data;
+        return data;
       }
       // otherwise, return an error
       return invalidDataError(electionId);
@@ -112,39 +143,8 @@ const getElectionData = () => {
     .catch((err) => console.log(`ERROR in server attempting to get election info for ${userLocation.address}. Error is: ${err}`));
 };
 
-// wait to see if our initial fetch for election id is complete
-const checkForElectionId = () => Promise.all([getMatchingElections()]);
-
-// once our fetch for election id is complete...
-checkForElectionId()
-  .then(() => {
-    // then check to see if election ID is defined
-    if (electionId !== undefined) {
-      // if it is, then get the data for that election
-      getElectionData();
-    }
-  })
-  .catch('Error when trying to check whether election ID fetch request worked');
-
-// now we can use the variable 'electionData' to pick out what we want to send to the front end
-// will add more here soon
-// we can also adjust our query for election data to /voterinfo so that we only ask for what we need
-
-
-// Need to make a get request from this URL with the user address
-// `https://maps.googleapis.com/maps/api/geocode/json?address=${address}&key=${mapsAPI}`
-// and then iterate over the pollingLocations, earlyVoteSites, dropOffLocations
-// and make a request for each of those addresses, saving the resulting long/lat for each
-// this will be in results[index].geometry.location.lat and
-// results[index].geometry.location.long
-// we may be able to pass in multiple addresses per API call, hence the index
-// if not, we'll want to use results[0]
-
-// putting this in a function so we can return a promise that we wait for.
-// we'll want to wait for the promise for get ElectionData to resolve before calling this
-const geocodeUserAddress = () => {
-  // get request for user address
-  fetch(`https://maps.googleapis.com/maps/api/geocode/json?address=${userLocation.address}&key=${mapsAPI}`, {
+const doFetch = async (queryURI) => {
+  return fetch(queryURI, {
     method: 'GET',
     headers: {
       'Content-Type': 'Application/JSON',
@@ -153,55 +153,94 @@ const geocodeUserAddress = () => {
     .then((res) => res.json())
     .then((data) => {
       console.log(`latitude is ${data.results[0].geometry.location.lat} and longitude is ${data.results[0].geometry.location.lng}`);
-      userLocation.latitude = data.results[0].geometry.location.lat;
-      userLocation.longitude = data.results[0].geometry.location.lng;
+      // trusting that location as a referece will add the latitude and longitude properties here
+      // to electionData.pollingLocations[i]
+      // this means every location in pollingLocations will have a latitude and longitude
+      const location = {};
+      location.latitude = data.results[0].geometry.location.lat;
+      location.longitude = data.results[0].geometry.location.lng;
+      return location;
     })
-    .catch();
+    .catch((err) => {
+      console.log('error getting pollingLocation address\'s latitude and/or longitude: ', err);
+    });
+}
+
+const geocodeVotingLocations = async (electionData) => {
+  // loop for pollingLocations array
+  for (let i = 0; i < electionData.pollingLocations.length; i += 1) {
+    // simpler reference to the location for the current element
+    const location = electionData.pollingLocations[i].address;
+    // appending together the first line of the address with the city and state
+    let currentAddress = `${location.line1} ${location.city} ${location.state}`;
+    // encoding the address so we can use it in the query URI
+    currentAddress = encodeURI(currentAddress);
+    // saving the query URI for our fetch request
+    const queryURI = `https://maps.googleapis.com/maps/api/geocode/json?address=${currentAddress}&key=${mapsAPI}`;
+    // then make call to geocoding API to get long/lat
+    const loc = await doFetch(queryURI);
+    const { longitude, latitude } = loc;
+    location.longitude = longitude;
+    location.latitude = latitude;
+  }
+
+  // loop for earlyVoteSites locations array
+
+  // loop for dropOffLocations array
 };
 
-// wait to see if our fetch for election data is complete
-const checkForElectionData = () => Promise.all([getElectionData()]);
+// // wait to see if our initial fetch for election id is complete
+// const checkForElectionId = () => Promise.all([getMatchingElections()]);
 
-checkForElectionData()
-  .then(geocodeUserAddress)
-  .then(() => {
-    console.log(`election data is ${JSON.stringify(electionData)}`);
-  });
-
-// loop for pollingLocations array
-// for (let i = 0; i < electionData.pollingLocations.length; i += 1) {
-//   // simpler reference to the location for the current element
-//   const location = electionData.pollingLocations[i];
-//   // appending together the first line of the address with the city and state
-//   let currentAddress = `${location.address.line1} ${location.address.city} ${location.address.state}`;
-//   // encoding the address so we can use it in the query URI
-//   currentAddress = currentAddress.encodeURI();
-//   // saving the query URI for our fetch request
-//   const queryURI = `https://maps.googleapis.com/maps/api/geocode/json?address=${currentAddress}&key=${mapsAPI}`;
-//   // then make call to geocoding API to get long/lat
-//   fetch(queryURI, {
-//     method: 'GET',
-//     headers: {
-//       'Content-Type': 'Application/JSON',
-//     },
+// // once our fetch for election id is complete...
+// checkForElectionId()
+//   .then(() => {
+//     // then check to see if election ID is defined
+//     if (electionId !== undefined) {
+//       // if it is, then get the data for that election
+//       return getElectionData();
+//     }
 //   })
-//     .then((res) => res.json())
-//     .then((data) => {
-//       console.log(`latitude is ${data.results[0].geometry.location.lat} and longitude is ${data.results[0].geometry.location.lng}`);
-//       // trusting that location as a referece will add the latitude and longitude properties here
-//       // to electionData.pollingLocations[i]
-//       // this means every location in pollingLocations will have a latitude and longitude
-//       location.latitude = data.results[0].geometry.location.lat;
-//       location.longitude = data.results[0].geometry.location.lng;
-//     })
-//     .catch((err) => {
-//       console.log('error getting pollingLocation address\'s latitude and/or longitude: ', err);
-//     });
-// }
+//   .then(() => {
+//     geocodeVotingLocations();
+//   })
+//   .catch('Error when trying to check whether election ID fetch request worked');
 
-// loop for earlyVoteSites locations array
+const electionPipeline = async () => {
+  await geocodeUserAddress();
+  const electionId = await getMatchingElections();
+  const electionData = await getElectionData(electionId);
+  await geocodeVotingLocations(electionData);
+};
 
-// loop for dropOffLocations array
+// getMatchingElections()
+//   .then(() => {
+//     // then check to see if election ID is defined
+//     if (electionId !== undefined) {
+//       console.log('this should be step 2');
+//       // if it is, then get the data for that election
+//       return getElectionData();
+//     }
+//   })
+//   .then(() => {
+//     console.log('this should be step 3');
+//     geocodeVotingLocations();
+//   })
+//   .catch('Error when trying to check whether election ID fetch request worked');
+
+// now we can use the variable 'electionData' to pick out what we want to send to the front end
+// we can also adjust our query for election data to /voterinfo so that we only ask for what we need
+
+// wait to see if our fetch for election data is complete
+// const checkForElectionData = () => Promise.all([getElectionData()]);
+
+// checkForElectionData()
+//   .then(geocodeVotingLocations())
+//   .then(() => {
+//     console.log(`election data is ${JSON.stringify(electionData)}`);
+//   });
+
+(async () => { await electionPipeline(); })();
 
 app.use(express.static(path.resolve(__dirname, '../dist')));
 

@@ -49,4 +49,9 @@ module.exports = {
     new CleanWebpackPlugin(),
     new webpack.DefinePlugin(envKeys),
   ],
+  devServer: {
+    proxy: {
+      '/api': 'http://localhost:3000',
+    },
+  },
 };

@@ -193,15 +193,16 @@ controller.apiQueries = (req, res, next) => {
   };
 
   const electionPipeline = async () => {
-    // immediately geocode the user address
-    // the result gets saved to the outer scope
-    // await geocodeUserAddress();
-    // then get the matching election ids
+    // get the matching election Id for the next election based on the user address in the request query
     const electionId = await getElectionId();
+    // then get the matching election data for that election id
     const electionData = await getElectionData(electionId);
+    // then geocode the locations for polling, drop-off for ballots, and early voting
     const dataWithGeocoding = await geocodeVotingLocations(electionData);
+    // then add the userLocation data onto the object
     dataWithGeocoding.userLocation = userLocation;
-    console.log(dataWithGeocoding.pollingLocations[0].address);
+    // then log to show that the whole thing was successful
+    console.log(dataWithGeocoding);
   };
 
   // now we can use the variable 'electionData' to pick out what we want to send to the front end

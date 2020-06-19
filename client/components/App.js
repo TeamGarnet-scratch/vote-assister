@@ -17,8 +17,8 @@ class App extends Component {
       <Layout>
         {/* Anything goes in here will be centered both vertically and horizontally
         since the Layout Component has display of flex. */}
-        <AddressComponent onSubmit={this.onSubmit}></AddressComponent>
-        {/* <CivicSummaryComponent></CivicSummaryComponent> */}
+        {/* <AddressComponent onSubmit={this.onSubmit}></AddressComponent> */}
+        <CivicSummaryComponent></CivicSummaryComponent>
       </Layout>
     );
   }

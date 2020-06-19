@@ -16,6 +16,7 @@ app.use(express.json());
 // define route handlers
 app.use('/api', router);
 
+// serve up static assets
 app.use(express.static(path.resolve(__dirname, '../dist')));
 
 // catch-all route handler for any requests to an unknown route

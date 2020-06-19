@@ -6,7 +6,6 @@ const AddressSearch = ({ onSubmit }) => {
   const [address, setAddress] = useState();
 
   const handleAddress = (payload) => {
-    console.log('PAYLOAD', payload);
     setAddress(payload);
   };
 

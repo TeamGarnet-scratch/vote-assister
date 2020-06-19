@@ -18,6 +18,8 @@
 
 .search__input__section {
   height: 25%;
+  width: 100%;
+  align-self: center;
 }
 
 .search__button {

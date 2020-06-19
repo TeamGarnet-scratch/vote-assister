@@ -21,7 +21,7 @@ import useOnclickOutside from 'react-cool-onclickoutside';
 import useScript from '../../common/useScript';
 import styles from './GeoSearchBar.css';
 
-const GeoSearchBar = () => {
+const GeoSearchBar = ({ onSubmit }) => {
   /**
    * Refresh tokens are needed to optimize the google place API to reduce the cost
    * Each time anyone types in this search bar, google counts the search individually on the API key's
@@ -31,6 +31,7 @@ const GeoSearchBar = () => {
    */
   const [refreshSessionToken, setRefreshSessionToken] = useState(true);
   const [apiSessionToken, setApiSessionToken] = useState();
+  const [addressPayload, setAddressPayload] = useState();
 
   const renewSessionToken = () => {
     return apiSessionToken;
@@ -55,7 +56,7 @@ const GeoSearchBar = () => {
    * https://github.com/wellyshen/use-places-autocomplete/issues/107
    */
   const [loaded, error] = useScript(
-    `https://maps.googleapis.com/maps/api/js?key=${process.env.REACT_APP_GOOGLE_MAPS_API_KEY}&libraries=places&callback=initMap`
+    `https://maps.googleapis.com/maps/api/js?key=${process.env.PLACES_API_KEY}&libraries=places&callback=initMap`
   );
 
   /**
@@ -98,6 +99,12 @@ const GeoSearchBar = () => {
           'Here are the lat/long pairs of the location :: ',
           `Lat ::${lat}, Lon ${lng}`
         );
+
+        onSubmit({
+          latitude: lat,
+          longitude: lng,
+          address: description,
+        });
       })
       .catch((error) => {
         if (window.DEBUG) {

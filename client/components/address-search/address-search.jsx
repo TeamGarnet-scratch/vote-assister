@@ -5,12 +5,22 @@ import styles from './address-search.css';
 const AddressSearch = ({ onSubmit }) => {
   const [address, setAddress] = useState();
 
+  const handleAddress = (payload) => {
+    console.log('PAYLOAD', payload);
+    setAddress(payload);
+  };
+
+  const onFormSubmit = (e) => {
+    e.preventDefault();
+    onSubmit(address);
+  };
+
   useEffect(() => {
     setAddress('');
   }, []);
 
   return (
-    <form onSubmit={onSubmit} className={styles.main_banner}>
+    <form onSubmit={onFormSubmit} className={styles.main_banner}>
       <h2 className={styles.where__vote}>Where do I vote?</h2>
       <div className={styles.main__banner}>
         <div className={styles.search__title}>
@@ -19,7 +29,7 @@ const AddressSearch = ({ onSubmit }) => {
           </label>
         </div>
         <div className={styles.search__input__section}>
-          <GeoSearchBar />
+          <GeoSearchBar onSubmit={handleAddress} />
         </div>
         <div className={styles.Namesearch__button}>
           <button type="submit" className={styles.search__input__button}>

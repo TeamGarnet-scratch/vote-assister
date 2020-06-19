@@ -1,8 +1,15 @@
 const path = require('path');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const { CleanWebpackPlugin } = require('clean-webpack-plugin');
-
+const dotenv = require('dotenv');
+const webpack = require('webpack');
 //  minicssExtractPlugin
+
+const env = dotenv.config().parsed;
+const envKeys = Object.keys(env).reduce((prev, next) => {
+  prev[`process.env.${next}`] = JSON.stringify(env[next]);
+  return prev;
+}, {});
 
 module.exports = {
   mode: 'development',
@@ -40,5 +47,6 @@ module.exports = {
   plugins: [
     new HtmlWebpackPlugin({ template: './index.html' }),
     new CleanWebpackPlugin(),
+    new webpack.DefinePlugin(envKeys),
   ],
 };

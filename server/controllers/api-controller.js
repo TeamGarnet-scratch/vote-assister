@@ -9,36 +9,15 @@ controller.apiQueries = (req, res, next) => {
   const civicAPI = process.env.CIVIC_API_KEY;
   const mapsAPI = process.env.MAPS_API_KEY;
 
-  // ***this is a sample address that will need to be replaced by user input from the front-end***
-  // currently using an object so we have an object with their address, their longitude, and their latitude once everything is done.
+  // using an object for user location so we have their address, their longitude, and their latitude from the query parameters.
   const userLocation = {};
-  userLocation.address = '3549%20G%20Rd%20Palisade%20CO';
 
-  // to geocode an address, we need to make a get request from this URL with the address
-  // `https://maps.googleapis.com/maps/api/geocode/json?address=${address}&key=${mapsAPI}`
-  // the resulting long/lat for each will be in results[index].geometry.location.lat and
-  // results[index].geometry.location.long
-  // in general, we'll want to use results[0] because other results are just if it's unsure
-  // about the address and gives multiple responses
-
-  // putting this in a function so we can return a promise that we wait for.
-  // we'll want to wait for the promise for get ElectionData to resolve before calling this
-  const geocodeUserAddress = () => {
-    // get request for user address
-    fetch(`https://maps.googleapis.com/maps/api/geocode/json?address=${userLocation.address}&key=${mapsAPI}`, {
-      method: 'GET',
-      headers: {
-        'Content-Type': 'Application/JSON',
-      },
-    })
-      .then((response) => response.json())
-      .then((data) => {
-        console.log(`latitude is ${data.results[0].geometry.location.lat} and longitude is ${data.results[0].geometry.location.lng}`);
-        userLocation.latitude = data.results[0].geometry.location.lat;
-        userLocation.longitude = data.results[0].geometry.location.lng;
-      })
-      .catch();
-  };
+  if (req.query) {
+    userLocation.address = req.query.address;
+    userLocation.lat = req.query.lat;
+    userLocation.long = req.query.long;
+  }
+  // need to add error handling here!
 
   // getting election ids
   const getElectionId = async () => {
@@ -124,7 +103,7 @@ controller.apiQueries = (req, res, next) => {
       })
       .catch((err) => console.log(`ERROR in server attempting to get election info for ${userLocation.address}. Error is: ${err}`));
   };
-  
+
   const doGeocodeFetch = async (queryURI) => {
     return fetch(queryURI, {
       method: 'GET',
@@ -144,6 +123,13 @@ controller.apiQueries = (req, res, next) => {
         console.log('error getting pollingLocation address\'s latitude and/or longitude: ', err);
       });
   };
+
+  // to geocode an address, we need to make a get request from this URL with the address
+  // `https://maps.googleapis.com/maps/api/geocode/json?address=${address}&key=${mapsAPI}`
+  // the resulting long/lat for each will be in results[index].geometry.location.lat and
+  // results[index].geometry.location.long
+  // in general, we'll want to use results[0] because other results are just if it's unsure
+  // about the address and gives multiple responses
 
   const geocodeVotingLocations = async (electionData) => {
     // loop for pollingLocations array
@@ -209,18 +195,21 @@ controller.apiQueries = (req, res, next) => {
   const electionPipeline = async () => {
     // immediately geocode the user address
     // the result gets saved to the outer scope
-    await geocodeUserAddress();
+    // await geocodeUserAddress();
     // then get the matching election ids
     const electionId = await getElectionId();
     const electionData = await getElectionData(electionId);
-    const finalResults = await geocodeVotingLocations(electionData);
-    console.log(finalResults.pollingLocations[0].address);
+    const dataWithGeocoding = await geocodeVotingLocations(electionData);
+    dataWithGeocoding.userLocation = userLocation;
+    console.log(dataWithGeocoding.pollingLocations[0].address);
   };
 
   // now we can use the variable 'electionData' to pick out what we want to send to the front end
 
   // invoking our election pipeline
   (async () => { await electionPipeline(); })();
+
+  next();
 };
 
 module.exports = controller;

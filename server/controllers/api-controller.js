@@ -51,13 +51,13 @@ controller.apiQueries = (req, res, next) => {
         // if we get no matches, we have to let the user know there are no upcoming elections
         if (matchingElections.length === 0) {
           // and skip the next fetch because there is no election to get data about
-          return noElectionsError(stateCode);
+          return next(noElectionsError(userLocation.address));
         }
         // if we only get one match, we can save the id immediately
         if (matchingElections.length === 1) {
           // if the id is 2000, then we have no real elections (2000 is sample data), so return an error
           if (parseInt(matchingElections[0].id, 10) === 2000) {
-            return noElectionsError(stateCode);
+            return next(noElectionsError(userLocation.address));
           }
           // otherwise it's a valid election ID, so save it
           electionId = parseInt(data.elections[0].id, 10);
@@ -80,7 +80,7 @@ controller.apiQueries = (req, res, next) => {
       })
       .catch((err) => console.log(`ERROR in server attempting to get Election ids. Error is: ${err}`));
   };
-  
+
   // getting info about the next election based on address passed in
   const getElectionData = async (electionId) => {
     // if it's defined, pass it to the API with the address and api key to get the matching election info
@@ -99,7 +99,7 @@ controller.apiQueries = (req, res, next) => {
           return data;
         }
         // otherwise, return an error
-        return invalidDataError(electionId);
+        next(invalidDataError(electionId));
       })
       .catch((err) => console.log(`ERROR in server attempting to get election info for ${userLocation.address}. Error is: ${err}`));
   };
@@ -132,62 +132,78 @@ controller.apiQueries = (req, res, next) => {
   // about the address and gives multiple responses
 
   const geocodeVotingLocations = async (electionData) => {
-    // loop for pollingLocations array
-    for (let i = 0; i < electionData.pollingLocations.length; i += 1) {
-      // simpler reference to the location for the current element
-      const location = electionData.pollingLocations[i].address;
-      // appending together the first line of the address with the city and state
-      let currentAddress = `${location.line1} ${location.city} ${location.state}`;
-      // encoding the address so we can use it in the query URI
-      currentAddress = encodeURI(currentAddress);
-      // saving the query URI for our fetch request
-      const queryURI = `https://maps.googleapis.com/maps/api/geocode/json?address=${currentAddress}&key=${mapsAPI}`;
-      // then make call to geocoding API to get long/lat
-      const loc = await doGeocodeFetch(queryURI);
-      // grab the long and lat properties from the result of the API query
-      const { longitude, latitude } = loc;
-      // and save them in the address property for that pollingLocation
-      location.longitude = longitude;
-      location.latitude = latitude;
+    // handle the possibility that there may not be any pollingLocations
+    if (!electionData.pollingLocations) {
+      electionData.pollingLocations = [];
+    } else {
+      // loop for pollingLocations array
+      for (let i = 0; i < electionData.pollingLocations.length; i += 1) {
+        // simpler reference to the location for the current element
+        const location = electionData.pollingLocations[i].address;
+        // appending together the first line of the address with the city and state
+        let currentAddress = `${location.line1} ${location.city} ${location.state}`;
+        // encoding the address so we can use it in the query URI
+        currentAddress = encodeURI(currentAddress);
+        // saving the query URI for our fetch request
+        const queryURI = `https://maps.googleapis.com/maps/api/geocode/json?address=${currentAddress}&key=${mapsAPI}`;
+        // then make call to geocoding API to get long/lat
+        const loc = await doGeocodeFetch(queryURI);
+        // grab the long and lat properties from the result of the API query
+        const { longitude, latitude } = loc;
+        // and save them in the address property for that pollingLocation
+        location.longitude = longitude;
+        location.latitude = latitude;
+      }
     }
 
-    // loop for earlyVoteSites locations array
-    for (let i = 0; i < electionData.earlyVoteSites.length; i += 1) {
-      // simpler reference to the location for the current element
-      const location = electionData.earlyVoteSites[i].address;
-      // appending together the first line of the address with the city and state
-      let currentAddress = `${location.line1} ${location.city} ${location.state}`;
-      // encoding the address so we can use it in the query URI
-      currentAddress = encodeURI(currentAddress);
-      // saving the query URI for our fetch request
-      const queryURI = `https://maps.googleapis.com/maps/api/geocode/json?address=${currentAddress}&key=${mapsAPI}`;
-      // then make call to geocoding API to get long/lat
-      const loc = await doGeocodeFetch(queryURI);
-      // grab the long and lat properties from the result of the API query
-      const { longitude, latitude } = loc;
-      // and save them in the address property for that earlyVoteSite
-      location.longitude = longitude;
-      location.latitude = latitude;
+    // handle the possibility that there may not be any earlyVoteSites
+    if (!electionData.earlyVoteSites) {
+      electionData.earlyVoteSites = [];
+    } else {
+      // loop for earlyVoteSites locations array
+      for (let i = 0; i < electionData.earlyVoteSites.length; i += 1) {
+        // simpler reference to the location for the current element
+        const location = electionData.earlyVoteSites[i].address;
+        // appending together the first line of the address with the city and state
+        let currentAddress = `${location.line1} ${location.city} ${location.state}`;
+        // encoding the address so we can use it in the query URI
+        currentAddress = encodeURI(currentAddress);
+        // saving the query URI for our fetch request
+        const queryURI = `https://maps.googleapis.com/maps/api/geocode/json?address=${currentAddress}&key=${mapsAPI}`;
+        // then make call to geocoding API to get long/lat
+        const loc = await doGeocodeFetch(queryURI);
+        // grab the long and lat properties from the result of the API query
+        const { longitude, latitude } = loc;
+        // and save them in the address property for that earlyVoteSite
+        location.longitude = longitude;
+        location.latitude = latitude;
+      }
     }
 
-    // loop for dropOffLocations array
-    for (let i = 0; i < electionData.dropOffLocations.length; i += 1) {
-      // simpler reference to the location for the current element
-      const location = electionData.dropOffLocations[i].address;
-      // appending together the first line of the address with the city and state
-      let currentAddress = `${location.line1} ${location.city} ${location.state}`;
-      // encoding the address so we can use it in the query URI
-      currentAddress = encodeURI(currentAddress);
-      // saving the query URI for our fetch request
-      const queryURI = `https://maps.googleapis.com/maps/api/geocode/json?address=${currentAddress}&key=${mapsAPI}`;
-      // then make call to geocoding API to get long/lat
-      const loc = await doGeocodeFetch(queryURI);
-      // grab the long and lat properties from the result of the API query
-      const { longitude, latitude } = loc;
-      // and save them in the address property for that dropOffLocation
-      location.longitude = longitude;
-      location.latitude = latitude;
+    // handle the possibility that there may not be any earlyVoteSites
+    if (!electionData.dropOffLocations) {
+      electionData.dropOffLocations = [];
+    } else {
+      // loop for dropOffLocations array
+      for (let i = 0; i < electionData.dropOffLocations.length; i += 1) {
+        // simpler reference to the location for the current element
+        const location = electionData.dropOffLocations[i].address;
+        // appending together the first line of the address with the city and state
+        let currentAddress = `${location.line1} ${location.city} ${location.state}`;
+        // encoding the address so we can use it in the query URI
+        currentAddress = encodeURI(currentAddress);
+        // saving the query URI for our fetch request
+        const queryURI = `https://maps.googleapis.com/maps/api/geocode/json?address=${currentAddress}&key=${mapsAPI}`;
+        // then make call to geocoding API to get long/lat
+        const loc = await doGeocodeFetch(queryURI);
+        // grab the long and lat properties from the result of the API query
+        const { longitude, latitude } = loc;
+        // and save them in the address property for that dropOffLocation
+        location.longitude = longitude;
+        location.latitude = latitude;
+      }
     }
+
     // return the election data with all the long/lat coordinates added
     return electionData;
   };
@@ -195,6 +211,9 @@ controller.apiQueries = (req, res, next) => {
   const electionPipeline = async () => {
     // get the matching election Id for the next election based on the user address in the request query
     const electionId = await getElectionId();
+    if (!electionId) {
+      return noElectionsError(userLocation.address);
+    }
     // then get the matching election data for that election id
     const electionData = await getElectionData(electionId);
     // then geocode the locations for polling, drop-off for ballots, and early voting
@@ -202,15 +221,21 @@ controller.apiQueries = (req, res, next) => {
     // then add the userLocation data onto the object
     dataWithGeocoding.userLocation = userLocation;
     // then log to show that the whole thing was successful
-    console.log(dataWithGeocoding);
   };
 
   // now we can use the variable 'electionData' to pick out what we want to send to the front end
 
   // invoking our election pipeline
-  (async () => { await electionPipeline(); })();
+  (async () => {
+    try {
+      await electionPipeline();
+      next();
+    } catch (err) {
+      console.log('This Error occurred :: ', err);
+      next(err);
+    }
+  })();
 
-  next();
 };
 
 module.exports = controller;

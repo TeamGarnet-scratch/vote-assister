@@ -1,6 +1,5 @@
 const fetch = require('node-fetch');
 
-const noElectionsError = require('../constants/errors/no-elections');
 const invalidDataError = require('../constants/errors/invalid-data');
 
 const controller = {};
@@ -48,16 +47,18 @@ controller.apiQueries = (req, res, next) => {
             matchingElections.push(elections[i]);
           }
         }
+        
         // if we get no matches, we have to let the user know there are no upcoming elections
         if (matchingElections.length === 0) {
           // and skip the next fetch because there is no election to get data about
-          return next(noElectionsError(userLocation.address));
+          return next(`No upcoming Elections for ${userLocation.address}.`);
         }
         // if we only get one match, we can save the id immediately
         if (matchingElections.length === 1) {
           // if the id is 2000, then we have no real elections (2000 is sample data), so return an error
           if (parseInt(matchingElections[0].id, 10) === 2000) {
-            return next(noElectionsError(userLocation.address));
+            console.log('no matching elections');
+            return next(`No upcoming Elections for ${userLocation.address}.`);
           }
           // otherwise it's a valid election ID, so save it
           electionId = parseInt(data.elections[0].id, 10);
@@ -212,7 +213,7 @@ controller.apiQueries = (req, res, next) => {
     // get the matching election Id for the next election based on the user address in the request query
     const electionId = await getElectionId();
     if (!electionId) {
-      return noElectionsError(userLocation.address);
+      return `No upcoming Elections for ${userLocation.address}.`;
     }
     // then get the matching election data for that election id
     const electionData = await getElectionData(electionId);

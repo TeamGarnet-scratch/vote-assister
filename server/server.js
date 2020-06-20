@@ -38,4 +38,6 @@ app.use((err, req, res, next) => {
   res.status(errorObj.status).json(errorObj.message);
 });
 
-app.listen(port, () => console.log(`Example app listening at http://localhost:${port}`));
+app.listen(port, () =>
+  console.log(`Example app listening at http://localhost:${port}`)
+);

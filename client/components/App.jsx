@@ -8,6 +8,7 @@ import CivicSummaryComponent from './civic-summary/civic-summary';
 const App = () => {
   const [hasData, setHasData] = useState(false);
   const [mapData, setMapData] = useState(null);
+  const [error, setError] = useState(null);
 
   const handleOnSubmit = (addressData) => {
     console.log(addressData);
@@ -29,7 +30,7 @@ const App = () => {
         // setMapData(data);
       })
       .catch((e) => {
-        console.log('error', e);
+        setError(e);
       });
   };
 
@@ -40,7 +41,7 @@ const App = () => {
       {hasData ? (
         <CivicSummaryComponent mapData={mapData} />
       ) : (
-        <AddressComponent onSubmit={handleOnSubmit} />
+        <AddressComponent onSubmit={handleOnSubmit} error={e} />
       )}
     </Layout>
   );

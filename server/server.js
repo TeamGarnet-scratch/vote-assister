@@ -29,7 +29,7 @@ app.use((err, req, res, next) => {
   const defaultErr = {
     log: 'Express error handler caught unknown middleware error',
     status: 400,
-    message: { err: 'An error occurred' },
+    message: { error: err ? err : 'An error occurred'}, // if there is an error, return that message, otherwise use default
   };
 
   // create an object and put into it the defaultErr overwritten with the err object parameter (if it was passed in)

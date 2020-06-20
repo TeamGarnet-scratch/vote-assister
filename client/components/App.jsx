@@ -4,6 +4,7 @@ import axios from 'axios';
 import Layout from './Layout/Layout';
 import AddressComponent from './address-search/address-search';
 import CivicSummaryComponent from './civic-summary/civic-summary';
+import Map from './Map/Map';
 
 const App = () => {
   const [votingInfo, setVotingInfo] = useState(null);
@@ -34,7 +35,10 @@ const App = () => {
       {/* Anything goes in here will be centered both vertically and horizontally
       since the Layout Component has display of flex. */}
       {votingInfo ? (
-        <CivicSummaryComponent votingInfo={votingInfo} />
+        <>
+          <CivicSummaryComponent votingInfo={votingInfo} />
+          <Map mapData={votingInfo} />
+        </>
       ) : (
         <AddressComponent onSubmit={handleOnSubmit} error={error} />
       )}

@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import GeoSearchBar from '../geo-search-bar/GeoSearchBar';
 import styles from './address-search.css';
 
-const AddressSearch = ({ onSubmit, error: { error } }) => {
+const AddressSearch = ({ onSubmit, error }) => {
   const [address, setAddress] = useState();
 
   const handleAddress = (payload) => {

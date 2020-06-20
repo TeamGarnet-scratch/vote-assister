@@ -25,12 +25,11 @@ const App = () => {
         },
       })
       .then((data) => {
-        console.log('MAP DATA', data);
         // setHasData(true);
         // setMapData(data);
       })
       .catch((e) => {
-        setError(e);
+        setError(e.response.data);
       });
   };
 
@@ -41,7 +40,7 @@ const App = () => {
       {hasData ? (
         <CivicSummaryComponent mapData={mapData} />
       ) : (
-        <AddressComponent onSubmit={handleOnSubmit} error={e} />
+        <AddressComponent onSubmit={handleOnSubmit} error={error} />
       )}
     </Layout>
   );

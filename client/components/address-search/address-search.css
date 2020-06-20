@@ -10,6 +10,15 @@
   border-radius: 5px;
 }
 
+.address__form {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.where__vote {
+  margin-bottom: 20px;
+}
+
 .search__title {
   display: flex;
   flex-direction: column-reverse;
@@ -17,9 +26,14 @@
 }
 
 .search__input__section {
-  height: 25%;
+  height: 15%;
   width: 100%;
   align-self: center;
+}
+
+.subtext {
+  font-size: 12px;
+  margin-bottom: 20px;
 }
 
 .search__button {
@@ -50,6 +64,7 @@
   background: #428bca;
   border-radius: 5px;
   height: 3.75em;
+  border: none;
 }
 
 .search__input__button_text {
@@ -59,7 +74,7 @@
   font-size: 14px;
   line-height: 16px;
   color: #fffcfc;
-  padding: 0px 0px 0px 0px;
+  padding: 0px 10px 0px 10px;
 }
 
 /* ERROR */

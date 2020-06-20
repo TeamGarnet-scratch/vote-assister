@@ -10,16 +10,23 @@ const App = () => {
   const [mapData, setMapData] = useState(null);
 
   const handleOnSubmit = (addressData) => {
+    console.log(addressData);
     //send request and wait for data
     axios
       .get('/api', {
         params: {
-          ...addressData,
+          lat: addressData.latitude,
+          long: addressData.longitude,
+          address: addressData.address
+            .replaceAll(',', '')
+            .replaceAll('USA', '')
+            .trim(),
         },
       })
-      .then(({ data }) => {
-        setHasData(true);
-        setMapData(data);
+      .then((data) => {
+        console.log('MAP DATA', data);
+        // setHasData(true);
+        // setMapData(data);
       })
       .catch((e) => {
         console.log('error', e);

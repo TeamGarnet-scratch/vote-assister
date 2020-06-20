@@ -25,7 +25,8 @@ const VoteAssisterInfo = ({ payload }) => {
   );
 };
 
-const CivicSummary = () => {
+const CivicSummary = (mapData) => {
+  console.log('Map data in civic summ', mapData);
   return (
     <div className={styles.main__banner}>
       <div className={styles.summary__upper}>

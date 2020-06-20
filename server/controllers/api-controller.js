@@ -22,18 +22,23 @@ controller.apiQueries = (req, res, next) => {
   const getElectionId = async () => {
     // placeholder for election id
     let electionId;
-    return fetch(`https://www.googleapis.com/civicinfo/v2/elections?key=${civicAPI}`, {
-      method: 'GET',
-      headers: {
-        'Content-Type': 'Application/JSON',
-      },
-    })
+    return fetch(
+      `https://www.googleapis.com/civicinfo/v2/elections?key=${civicAPI}`,
+      {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'Application/JSON',
+        },
+      }
+    )
       .then((response) => response.json())
       .then((data) => {
         // shorter reference to elections array. each element will be an object
         const { elections } = data;
         // save the last two characters from the address to get the state's shorthand, and convert to lowercase
-        const stateCode = userLocation.address.substring(userLocation.address.length - 2).toLowerCase();
+        const stateCode = userLocation.address
+          .substring(userLocation.address.length - 2)
+          .toLowerCase();
         // create an array to save elections that match the location
         const matchingElections = [];
         // iterate over the elections object
@@ -43,11 +48,14 @@ controller.apiQueries = (req, res, next) => {
           // if it's state-specific, we'll get 'ocd-division/country:us/state:[CODE]'
           // where [CODE] is the two letter shorthand for the state of the address passed in, in lowercase
           // for example 'co' for colorado, or 'wa' for washington
-          if (elections[i].ocdDivisionId === 'ocd-division/country:us' || elections[i].ocdDivisionId.includes(`state:${stateCode}`)) {
+          if (
+            elections[i].ocdDivisionId === 'ocd-division/country:us' ||
+            elections[i].ocdDivisionId.includes(`state:${stateCode}`)
+          ) {
             matchingElections.push(elections[i]);
           }
         }
-        
+
         // if we get no matches, we have to let the user know there are no upcoming elections
         if (matchingElections.length === 0) {
           // and skip the next fetch because there is no election to get data about
@@ -66,7 +74,7 @@ controller.apiQueries = (req, res, next) => {
         // if we get a match for more than one election, check electionDay for the earliest date
         if (matchingElections.length > 1) {
           // then sort the elections by date
-          matchingElections.sort((a, b) => ((a.id > b.id) ? 1 : -1));
+          matchingElections.sort((a, b) => (a.id > b.id ? 1 : -1));
           // if the first election id is 2000, we need to skip it
           // we know we have at least one more, so...
           if (parseInt(matchingElections[0].id, 10) === 2000) {
@@ -79,19 +87,26 @@ controller.apiQueries = (req, res, next) => {
         }
         return electionId;
       })
-      .catch((err) => console.log(`ERROR in server attempting to get Election ids. Error is: ${err}`));
+      .catch((err) =>
+        console.log(
+          `ERROR in server attempting to get Election ids. Error is: ${err}`
+        )
+      );
   };
 
   // getting info about the next election based on address passed in
   const getElectionData = async (electionId) => {
     // if it's defined, pass it to the API with the address and api key to get the matching election info
     // we also only accept the election info that is marked as "official" in the API using the "officialOnly=true"
-    return fetch(`https://www.googleapis.com/civicinfo/v2/voterinfo?key=${process.env.CIVIC_API_KEY}&address=${userLocation.address}&electionId=${electionId}&officialOnly=true`, {
-      method: 'GET',
-      headers: {
-        'Content-Type': 'Application/JSON',
-      },
-    })
+    return fetch(
+      `https://www.googleapis.com/civicinfo/v2/voterinfo?key=${process.env.CIVIC_API_KEY}&address=${userLocation.address}&electionId=${electionId}&officialOnly=true`,
+      {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'Application/JSON',
+        },
+      }
+    )
       .then((response) => response.json())
       .then((data) => {
         // check to make sure we've got an object with an election property, and that the id matches the one we wanted
@@ -102,7 +117,11 @@ controller.apiQueries = (req, res, next) => {
         // otherwise, return an error
         next(invalidDataError(electionId));
       })
-      .catch((err) => console.log(`ERROR in server attempting to get election info for ${userLocation.address}. Error is: ${err}`));
+      .catch((err) =>
+        console.log(
+          `ERROR in server attempting to get election info for ${userLocation.address}. Error is: ${err}`
+        )
+      );
   };
 
   const doGeocodeFetch = async (queryURI) => {
@@ -121,7 +140,10 @@ controller.apiQueries = (req, res, next) => {
         return location;
       })
       .catch((err) => {
-        console.log('error getting pollingLocation address\'s latitude and/or longitude: ', err);
+        console.log(
+          "error getting pollingLocation address's latitude and/or longitude: ",
+          err
+        );
       });
   };
 
@@ -221,6 +243,7 @@ controller.apiQueries = (req, res, next) => {
     const dataWithGeocoding = await geocodeVotingLocations(electionData);
     // then add the userLocation data onto the object
     dataWithGeocoding.userLocation = userLocation;
+    res.locals.electionData = dataWithGeocoding;
     // then log to show that the whole thing was successful
   };
 
@@ -236,7 +259,6 @@ controller.apiQueries = (req, res, next) => {
       next(err);
     }
   })();
-
 };
 
 module.exports = controller;

@@ -1,23 +1,47 @@
 import React, { useState } from 'react';
+import axios from 'axios';
+
 import Layout from './Layout/Layout';
 import AddressComponent from './address-search/address-search';
 import CivicSummaryComponent from './civic-summary/civic-summary';
 
 const App = () => {
   const [hasData, setHasData] = useState(false);
+  const [mapData, setMapData] = useState(null);
+  const [error, setError] = useState(null);
 
-  const handleOnSubmit = (data) => {
+  const handleOnSubmit = (addressData) => {
+    console.log(addressData);
     //send request and wait for data
-
-    console.log('FINAL ADDRESS', data);
+    axios
+      .get('/api', {
+        params: {
+          lat: addressData.latitude,
+          long: addressData.longitude,
+          address: addressData.address
+            .replaceAll(',', '')
+            .replaceAll('USA', '')
+            .trim(),
+        },
+      })
+      .then((data) => {
+        // setHasData(true);
+        // setMapData(data);
+      })
+      .catch((e) => {
+        setError(e.response.data);
+      });
   };
 
   return (
     <Layout>
       {/* Anything goes in here will be centered both vertically and horizontally
       since the Layout Component has display of flex. */}
-      <AddressComponent onSubmit={handleOnSubmit} />
-      {/* <CivicSummaryComponent /> */}
+      {hasData ? (
+        <CivicSummaryComponent mapData={mapData} />
+      ) : (
+        <AddressComponent onSubmit={handleOnSubmit} error={error} />
+      )}
     </Layout>
   );
 };

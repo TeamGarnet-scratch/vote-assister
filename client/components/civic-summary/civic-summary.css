@@ -11,6 +11,9 @@
   border-radius: 5px;
   font-family: Work Sans;
   font-style: normal;
+  position: absolute;
+  left: 10%;
+  padding: 3em 0;
 }
 
 .main__banner h1 {

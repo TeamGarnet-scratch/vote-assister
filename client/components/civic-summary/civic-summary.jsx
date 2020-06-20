@@ -3,39 +3,62 @@ import React from 'react';
 import styles from './civic-summary.css';
 
 const Electioninfo = ({ payload }) => {
+  //payload is an array
+  //if array length is 0 then render nothing
+
+  console.log('ElectionINFO', payload);
+  let electionAdministrationBody = undefined;
+  if (payload.length > 0) {
+    electionAdministrationBody = payload[0]['electionAdministrationBody'];
+  }
   return (
     <div className={styles.summary__lower}>
       <div className={styles.summary__links}>
-        <a className={styles.links}>Election Info</a>
-        <a className={styles.links}>Registration Info</a>
-        <a className={styles.links}>Registration Confirmation</a>
-        <a className={styles.links}>If there is a URL then render</a>
+        {Object.keys(electionAdministrationBody).map((key) => {
+          return (
+            <a href={`${electionAdministrationBody[key]}`} key={key}>
+              {key
+                .split(/(?=[A-Z])/)
+                .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+                .join(' ')}
+            </a>
+          );
+        })}
       </div>
     </div>
   );
 };
 
 const VoteAssisterInfo = ({ payload }) => {
+  console.log('PAYLOAD', payload);
   return (
     <div>
       <h1>Next Election's Summary</h1>
-      <h2>Election Name</h2>
-      <p className={styles.small}>Mail only state</p>
+      <h2>{payload.election.name}</h2>
+      <span className={styles.small}>Mail only state: </span>
+      <span>{payload.mailOnly ? 'Yes' : 'No'}</span>
     </div>
   );
 };
 
-const CivicSummary = (mapData) => {
-  console.log('Map data in civic summ', mapData);
+const CivicSummary = ({ votingInfo }) => {
+  console.log('votingInfo', votingInfo);
+  const { election, mailOnly, state } = votingInfo;
+
   return (
     <div className={styles.main__banner}>
       <div className={styles.summary__upper}>
-        <VoteAssisterInfo payload={{ date: '' }} />
+        <VoteAssisterInfo
+          payload={{
+            election,
+            mailOnly,
+          }}
+        />
       </div>
       <div className={styles.summary__middle}>
-        Election Day: <strong>06/30/2020</strong>
+        Election Day: <strong>{election.electionDay}</strong>
       </div>
-      <Electioninfo payload={{ electionInfo: '', pollinglocation: '' }} />
+      <Electioninfo payload={state} />
     </div>
   );
 };

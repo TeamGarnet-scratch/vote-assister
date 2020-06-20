@@ -6,13 +6,10 @@ import AddressComponent from './address-search/address-search';
 import CivicSummaryComponent from './civic-summary/civic-summary';
 
 const App = () => {
-  const [hasData, setHasData] = useState(false);
-  const [mapData, setMapData] = useState(null);
+  const [votingInfo, setVotingInfo] = useState(null);
   const [error, setError] = useState(null);
 
   const handleOnSubmit = (addressData) => {
-    console.log(addressData);
-    //send request and wait for data
     axios
       .get('/api', {
         params: {
@@ -24,9 +21,8 @@ const App = () => {
             .trim(),
         },
       })
-      .then((data) => {
-        // setHasData(true);
-        // setMapData(data);
+      .then(({ data }) => {
+        setVotingInfo(data);
       })
       .catch((e) => {
         setError(e.response.data);
@@ -37,8 +33,8 @@ const App = () => {
     <Layout>
       {/* Anything goes in here will be centered both vertically and horizontally
       since the Layout Component has display of flex. */}
-      {hasData ? (
-        <CivicSummaryComponent mapData={mapData} />
+      {votingInfo ? (
+        <CivicSummaryComponent votingInfo={votingInfo} />
       ) : (
         <AddressComponent onSubmit={handleOnSubmit} error={error} />
       )}

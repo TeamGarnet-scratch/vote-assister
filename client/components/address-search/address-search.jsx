@@ -19,27 +19,30 @@ const AddressSearch = ({ onSubmit, error }) => {
   }, []);
 
   return (
-    <form onSubmit={onFormSubmit} className={styles.main_banner}>
+    <div className={styles.address__form}>
       <h2 className={styles.where__vote}>Where do I vote?</h2>
-      <div className={styles.main__banner}>
-        <div className={styles.search__title}>
-          <label className={styles.call__to__action} htmlFor="address">
-            Enter address or zip code:
-          </label>
+      <form onSubmit={onFormSubmit}>
+        <div className={styles.main__banner}>
+          <div className={styles.search__title}>
+            <label className={styles.call__to__action} htmlFor="address">
+              Enter your address*:
+            </label>
+          </div>
+          <div className={styles.search__input__section}>
+            <GeoSearchBar onSubmit={handleAddress} />
+          </div>
+          <p className={styles.subtext}>*US Addresses only</p>
+          {error && <div className={styles.errorMessage}>{error.error}</div>}
+          <div className={styles.Namesearch__button}>
+            <button type="submit" className={styles.search__input__button}>
+              <p className={styles.search__input__button_text}>
+                Show Locations
+              </p>
+            </button>
+          </div>
         </div>
-        <div className={styles.search__input__section}>
-          <GeoSearchBar onSubmit={handleAddress} />
-        </div>
-        {error && <div className={styles.errorMessage}>{error.error}</div>}
-        <div className={styles.Namesearch__button}>
-          <button type="submit" className={styles.search__input__button}>
-            <p className={styles.search__input__button_text}>
-              Search Locations
-            </p>
-          </button>
-        </div>
-      </div>
-    </form>
+      </form>
+    </div>
   );
 };
 

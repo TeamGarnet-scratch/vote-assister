@@ -3,5 +3,5 @@ import React from 'react';
 import styles from './Footer.css';
 
 export default (props) => {
-  return <div className={styles.Footer}>This is my footer</div>;
+  return <div className={styles.Footer}></div>;
 };

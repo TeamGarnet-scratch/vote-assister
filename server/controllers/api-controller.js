@@ -55,7 +55,7 @@ controller.apiQueries = (req, res, next) => {
             matchingElections.push(elections[i]);
           }
         }
-        
+
         // if we get no matches, we have to let the user know there are no upcoming elections
         if (matchingElections.length === 0) {
           // and skip the next fetch because there is no election to get data about
@@ -243,6 +243,7 @@ controller.apiQueries = (req, res, next) => {
     const dataWithGeocoding = await geocodeVotingLocations(electionData);
     // then add the userLocation data onto the object
     dataWithGeocoding.userLocation = userLocation;
+    res.locals.electionData = dataWithGeocoding;
     // then log to show that the whole thing was successful
   };
 
